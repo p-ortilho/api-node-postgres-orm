@@ -4,5 +4,3 @@ create table produtos (
 	preco DECIMAL(10, 2) NOT NULL,
 	estoque SMALLINT NOT NULL
 );
-
-SELECT * FROM produtos;

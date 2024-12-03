@@ -11,7 +11,8 @@
   "description": "",
   "dependencies": {
     "express": "^4.21.1",
-    "json-server": "^1.0.0-beta.3",
-    "pg": "^8.13.1"
+    "pg": "^8.13.1",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.37.5"
   }
 }

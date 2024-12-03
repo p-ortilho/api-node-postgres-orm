@@ -1,34 +1,32 @@
 const express = require("express");
+const Produto = require("../models/Produtos");
 const router = express.Router();
-const pool = require("../database/db");
 
 // Listar todos os produtos
 router.get("/", async (req, res) => {
-    try
+    try 
     {
-        const resulado = await pool.query("SELECT * FROM produtos");
-        res.status(200).json(resulado.rows);
-    }
-    catch(error)
+        const produtos = await Produto.findAll();
+        res.status(200).json(produtos);
+    } 
+    catch (error) 
     {
-        res.status(500).json({erro:error.message});
+        res.status(500).json({ erro: error.message });
     }
 });
 
 // Listar produto específico
 router.get("/produto/:id", async (req, res) => {
-    const idProduto = parseInt(req.params.id, 10);
-
     try
     {
-        const resultado = await pool.query("SELECT * FROM produtos WHERE id = $1", [idProduto]);
-
-        if (resultado.rows.length === 0)
+        const resultado = await Produto.findByPk(req.params.id);
+        
+        if (!resultado)
         {
-            return res.status(404).json({erro:"Produto não encontrado!"});
+            throw new Error("Produto não encontrado!");
         }
-
-        res.status(200).json(resultado.rows[0]);
+        
+        res.status(200).json(resultado);
     }
     catch(error)
     {
@@ -37,46 +35,55 @@ router.get("/produto/:id", async (req, res) => {
 });
 
 // Criar novo produto
-router.post("/novo-produto", async (req, res) => {
+router.post("/novo-produto", async (req, res) => {    
     const { nome, preco, estoque } = req.body;
 
     if (!nome || !preco || !estoque) {
         return res.status(400).json({ erro: "Campos obrigatórios: 'nome', 'preco', 'estoque'." });
     }
-    
+
     try
     {
-        (async () => {
-            await pool.query("INSERT INTO produtos (nome, preco, estoque) VALUES ($1, $2, $3)", [nome, preco, estoque]);
-        })();
+        const produto = await Produto.create({ nome, preco, estoque });
 
-        res.status(201).json({mensagem: "Produto adicionado com sucesso!"});
+        res.status(201).json({mensagem: "Produto adicionado com sucesso!", produto});
     }
     catch(error)
     {
-        res.status(500).json({erro: error.mensagem});
+        res.status(500).json({erro:error.message});
     }
 });
 
 // Atualizar produto
 router.put("/atualizar/:id", async (req, res) => {
+    const { nome, preco, estoque } = req.body;
     const idProduto = parseInt(req.params.id, 10);
-    const {nome, preco, estoque} = req.body;
 
-    try
-    {
-        const resultado = await pool.query("UPDATE produtos SET nome = $1, preco = $2, estoque = $3 WHERE id = $4 RETURNING *", [nome, preco, estoque, idProduto]);
+    try {
+        const produto = await Produto.findByPk(idProduto);
 
-        if (resultado.rows.length === 0)
+        if (!produto) 
         {
-            return res.status(404).json({erro:"Produto não encontrado!"});
+            return res.status(404).json({ erro: "Produto não encontrado!" });
         }
 
-        res.status(200).json({mensagem: "Produto atualizado com sucesso!"});
-    }
-    catch(error)
+        if (!nome && !preco && !estoque) 
+        {
+            return res.status(400).json({ erro: "Informe os dados que deseja atualizar!" });
+        }
+
+        // Atualiza apenas os campos fornecidos
+        if (nome) produto.nome = nome;
+        if (preco) produto.preco = preco;
+        if (estoque) produto.estoque = estoque;
+
+        await produto.save();
+
+        res.status(200).json({ mensagem: "Produto atualizado com sucesso!", produto });
+    } 
+    catch (error) 
     {
-        res.status(500).json({erro:error.message});
+        res.status(500).json({ erro: error.message });
     }
 });
 
@@ -84,20 +91,18 @@ router.put("/atualizar/:id", async (req, res) => {
 router.delete("/deletar/:id", async (req, res) => {
     const idProduto = parseInt(req.params.id, 10);
     
-    try
-    {
-        const resultado = await pool.query("DELETE FROM produtos WHERE id = $1", [idProduto]);
+    try {
+        const produto = await Produto.findByPk(idProduto);
 
-        if (resultado.rowCount === 0)
-        {
-            return res.status(404).json({erro:"Produto não encontrado!"});
+        if (!produto) {
+            return res.status(404).json({ erro: "Produto não encontrado!" });
         }
 
-        res.status(200).json({mensagem: "Produto deletado com sucesso!"});
-    }
-    catch(error)
-    {
-        res.status(500).json({erro:error.message});
+        await produto.destroy();
+
+        res.status(200).json({ mensagem: "Produto deletado com sucesso!" });
+    } catch (error) {
+        res.status(500).json({ erro: error.message });
     }
 });
 

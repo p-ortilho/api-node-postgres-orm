@@ -1,13 +1,30 @@
-const express = require("express"); // Importa o express
-const app = express();              // Inicializa o express
-const port = 3000;
+const express = require("express");
+const sequelize = require("./config/database");
+const routers = require("./routes/produtos");
+const app = express();
+const port = 6000;
 
-// Criar middleware para interpretar o corpo da requisição
 app.use(express.json());
 
-// Importa as rotas
-const routers = require("./routes/produtos");
+// Sincronizar com o banco de dados
+// sequelize.sync()
+//     .then(() => console.log("Banco de dados sincronizado"))
+//     .catch(error => console.log("Erro ao sincronizar banco de dados:", error));
 
-app.use("/produtos", routers);
+async function sincronizarBancoDeDados() {
+    try {
+        await sequelize.sync();
+        console.log("Banco de dados sincronizado");
+    } 
+    catch (error) 
+    {
+        console.log("Erro ao sincronizar banco de dados:", error);
+    }
+}
 
-app.listen(port, () => console.log(`Servidor está rodando na porta http://localhost:${port}`));
+sincronizarBancoDeDados();
+
+app.use('/produtos', routers);
+
+// Rotas e lógica continuam...
+app.listen(port, () => console.log(`Servidor rodando na porta http://localhost:${port}`));

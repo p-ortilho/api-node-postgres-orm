@@ -1,36 +1,11 @@
 # 🛍️ API de Produtos
 
-Esta é uma API simples para gerenciar produtos utilizando Node.js, Express e PostgreSQL. 📦🚀
+📦Esta é uma API simples para gerenciar produtos utilizando Node.js, Express, PostgreSQL e Sequelize. O objetivo nesse estudo foi a utilização de uma ORM para trabalhar com o Banco de Dados sem usar SQL diretamente no código, melhorando assim a segurança da aplicação.🚀
 
 ## Pré-requisitos 📋
 
 - Node.js instalado 💻
 - PostgreSQL instalado e configurado 🗄️
-
-
-## Configuração do Banco de Dados 🔧
-
-1. Crie um banco de dados PostgreSQL e configure as credenciais no arquivo `database/db.js`:
-    ```javascript
-    const pool = new Pool ({
-        user: "postgres",
-        host: "localhost",
-        password: "password",
-        database: "database",
-        port: 5432
-    });
-    ```
-
-2. Crie a tabela de produtos utilizando o script SQL em `SQL/create_table.sql`:
-    ```sql
-    CREATE TABLE produtos (
-        id SERIAL PRIMARY KEY,
-        nome VARCHAR(100),
-        preco NUMERIC,
-        estoque INTEGER
-    );
-    ```
----
 
 # Endpoints 🌐
 
